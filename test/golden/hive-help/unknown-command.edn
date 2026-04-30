@@ -1,0 +1,4 @@
+{:kg-typo
+ "Unknown command for `kg`: \"travrese\"\n\nAvailable commands:\n  - traverse\n  - edge\n  - stats\n\nHINT: Did you mean `traverse`, `stats`, `edge`?\n\nExamples:\n  - {:tool \"kg\", :command \"traverse\", :start_node \"id\"}",
+ :memory-typo
+ "Unknown command for `memory`: \"qurey\"\n\nAvailable commands:\n  - query\n  - add\n  - get\n\nHINT: Did you mean `query`, `get`, `add`?\n\nExamples:\n  - {:tool \"memory\", :command \"query\", :query \"datahike\"}"}

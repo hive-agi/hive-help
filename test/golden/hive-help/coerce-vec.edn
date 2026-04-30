@@ -1,0 +1,7 @@
+{:already-vec {:ok ["a" "b"]},
+ :json-array {:ok ["a" "b"]},
+ :plain-string
+ {:error
+  "I was expecting an array for `tags` but got string: \"a,b\"\n\nHINT: Provide a JSON array, not a plain string.\n\nWRONG: tags: \"a,b\"\nRIGHT: tags: [\"item1\", \"item2\"]",
+  :data {:param :tags, :value "a,b", :expected :vector}},
+ :seq-value {:ok ["a" "b"]}}

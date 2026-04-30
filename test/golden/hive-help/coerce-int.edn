@@ -1,0 +1,7 @@
+{:already-int {:ok 42},
+ :bad-string
+ {:error
+  "I was expecting an integer for `limit` but got string: \"abc\"\n\nHINT: Pass an integer, not a string.\n\nWRONG: limit: \"abc\"\nRIGHT: limit: 20",
+  :data {:param :limit, :value "abc", :expected :integer}},
+ :nil-default {:ok 5},
+ :string-int {:ok 42}}
