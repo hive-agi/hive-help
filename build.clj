@@ -16,13 +16,21 @@
      deploy   jar + push to Clojars (needs CLOJARS_USERNAME / CLOJARS_PASSWORD)"
   (:require [clojure.tools.build.api :as b]
             [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.string :as str]
             [deps-deploy.deps-deploy :as dd]))
 
 (def ^:private cfg (edn/read-string (slurp "version.edn")))
 (def lib (:lib cfg))
-;; Patch number = full git commit count (datahike's scheme). CI must checkout
-;; with full history (fetch-depth: 0) or this is wrong.
-(def version (format "0.%s.%s" (:minor cfg 0) (b/git-count-revs nil)))
+;; Version source of truth = the repo's existing VERSION file (same value the
+;; GitHub release.yml tags as v{VERSION}), so the Clojars coord matches the
+;; git-tag coord 1:1. Falls back to datahike-style 0.{minor}.{git-count} only
+;; when no VERSION file exists. CI checkout needs fetch-depth:0 for the fallback.
+(def version
+  (let [f (io/file "VERSION")]
+    (if (.exists f)
+      (str/trim (slurp f))
+      (format "0.%s.%s" (:minor cfg 0) (b/git-count-revs nil)))))
 (def ^:private class-dir "target/classes")
 (def ^:private src-dirs (:src-dirs cfg ["src"]))
 (def ^:private jar-file (format "target/%s-%s.jar" (name lib) version))
