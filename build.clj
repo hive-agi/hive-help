@@ -73,12 +73,32 @@
               :pom-file  (b/pom-path {:lib lib :class-dir class-dir})})
   (println "Installed" (str lib) version "to ~/.m2"))
 
+(defn- already-published?
+  "True if this exact lib+version jar is already on Clojars. Clojars is immutable,
+   so re-deploying an existing version errors — this lets `deploy` no-op safely on
+   every push to main (only VERSION bumps produce a new release)."
+  []
+  (let [[grp art] (str/split (str lib) #"/")
+        url (format "https://repo.clojars.org/%s/%s/%s/%s-%s.jar"
+                    (str/replace grp "." "/") art version art version)]
+    (try
+      (let [conn (doto ^java.net.HttpURLConnection (.openConnection (java.net.URL. url))
+                   (.setRequestMethod "HEAD")
+                   (.setConnectTimeout 10000)
+                   (.setReadTimeout 10000))]
+        (= 200 (.getResponseCode conn)))
+      (catch Throwable _ false))))
+
 (defn deploy
   "Build + deploy to Clojars. Requires CLOJARS_USERNAME and CLOJARS_PASSWORD
-   (a deploy token, not your account password) in the environment."
+   (a deploy token, not your account password) in the environment. No-ops if the
+   version is already published (idempotent — safe to run on every main push)."
   [_]
-  (jar nil)
-  (dd/deploy {:installer :remote
-              :artifact  jar-file
-              :pom-file  (b/pom-path {:lib lib :class-dir class-dir})})
-  (println "Deployed" (str lib) version "to Clojars"))
+  (if (already-published?)
+    (println "Skip:" (str lib) version "already on Clojars — bump VERSION to release.")
+    (do
+      (jar nil)
+      (dd/deploy {:installer :remote
+                  :artifact  jar-file
+                  :pom-file  (b/pom-path {:lib lib :class-dir class-dir})})
+      (println "Deployed" (str lib) version "to Clojars"))))
