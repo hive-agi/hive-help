@@ -3,3 +3,6 @@
 .lsp/.cache/
 target/
 local.deps.edn
+.lsp/
+*.elc
+.nrepl-port
