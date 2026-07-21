@@ -2,4 +2,4 @@
  :minor    1
  :license  {:name "EPL-2.0" :url "https://www.eclipse.org/legal/epl-2.0/"}
  :scm-url  "https://github.com/hive-agi/hive-help"
- :src-dirs ["src"]}
+ :src-dirs ["src"] :publish  :none}
