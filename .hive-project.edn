@@ -2,4 +2,5 @@
  :parent "hive"
  :description "Shared utility library for actionable help and error messages across the Hive ecosystem"
  :language :clojure
- :tags ["help" "errors" "mcp" "utility"]}
+ :tags ["help" "errors" "mcp" "utility"] 
+ :carto {:source-roots ["src" "test"]}}
