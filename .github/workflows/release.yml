@@ -30,8 +30,9 @@ jobs:
         with:
           cli: latest
 
-      # Gate BEFORE the bump: a published pom is immutable, so a red suite
-      # must not be able to mint a version, tag it and ship it.
+      # Every gate runs BEFORE the bump: a published pom is immutable, so a
+      # red suite, a narrowed public surface or a README that lies must not
+      # be able to mint a version, tag it and ship it.
       - name: Test
         run: |
           if [ -d test ]; then
@@ -40,15 +41,30 @@ jobs:
             echo "no test/ directory — nothing to gate on"
           fi
 
+      # The public API surface on disk against the surface at the last tag,
+      # under ./freeze-policy.edn: additive-only between releases.
+      - name: Freeze check
+        run: clojure -T:build freeze-check
+
+      # Every fenced clojure block in README.md runs in a new JVM, and every
+      # `;; =>` line is a claim the run refutes when it stops being true.
+      - name: README examples
+        run: clojure -T:build readme-examples
+
       - name: Bump patch version
         run: clojure -T:build bump :level :patch
+
+      # Runs AFTER the bump and BEFORE the tag: the pending version comes from
+      # ./VERSION, which no tag names yet, so the release describes itself.
+      - name: Regenerate changelog
+        run: clojure -T:build changelog
 
       - name: Commit and tag
         run: |
           VER=$(cat VERSION)
           git config user.name  "hive-ci"
           git config user.email "ci@hive-agi.local"
-          git add VERSION
+          git add VERSION CHANGELOG.md
           # [skip ci] stops this push from retriggering the workflow.
           git commit -m "chore(release): $VER [skip ci]"
           # Annotated: `git push --follow-tags` ignores lightweight tags,

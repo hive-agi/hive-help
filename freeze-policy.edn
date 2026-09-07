@@ -1,0 +1,13 @@
+;; The freeze policy for hive-help. Read by `clojure -T:build freeze-check`
+;; (hive-build.api/freeze-check), which runs BEFORE bump/deploy in release.yml.
+;;
+;; hive-help releases on merge, so there is no cadence rule. Its whole value
+;; is that a message helper a caller reached for keeps existing: removing or
+;; narrowing a public name between releases is refused unless the commit
+;; says so with the break marker and the release cuts a MAJOR.
+{:policy/version 1
+
+ :cadence {:mode :on-merge}
+
+ :compatibility {:additive-only? true
+                 :break-marker "BREAKING-CHANGE:"}}

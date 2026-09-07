@@ -1,0 +1,36 @@
+name: ci
+
+# The release gates, on every pull request and on every push to a branch
+# other than main: a README that lies or a narrowed public surface is caught
+# here, before a merge can start the release.
+on:
+  pull_request:
+  push:
+    branches-ignore: [main, master]
+  workflow_dispatch:
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: DeLaGuardo/setup-clojure@13.0
+        with:
+          cli: latest
+
+      - name: Test
+        run: clojure -M:test
+
+      - name: Freeze check
+        run: clojure -T:build freeze-check
+
+      - name: README examples
+        run: clojure -T:build readme-examples
+
+      # Renders to target/ so a PR proves the changelog still generates
+      # without committing a file that the release rewrites anyway.
+      - name: Changelog renders
+        run: clojure -T:build changelog :out '"target/CHANGELOG.md"'
