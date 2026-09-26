@@ -18,11 +18,17 @@ does not disappear or narrow without a MAJOR bump; the release workflow's
 an optional key is a minor or patch change. The exact wording of a message is
 not part of the promise: callers match on the result maps, not on the prose.
 
+## [0.1.5] - 2026-09-26
+
+_No user-facing changes._
+
+_Plus 3 routine commits (docs, tests, build, chores)._
+
 ## [0.1.4] - 2026-09-07
 
 _No user-facing changes._
 
-_Plus 1 routine commit (docs, tests, build, chores)._
+_Plus 2 routine commits (docs, tests, build, chores)._
 
 ## [0.1.3] - 2026-09-06
 
