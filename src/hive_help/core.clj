@@ -16,7 +16,23 @@
     (boolean? value) "boolean"
     :else (.getSimpleName (class value))))
 
-(defn backtick [x] (str "`" (name x) "`"))
+(defn label
+  "How a command, a param or a choice is SHOWN and MATCHED.
+
+   A qualified keyword keeps its namespace: `:timeline/insert-clip` is
+   \"timeline/insert-clip\", not \"insert-clip\". `name` alone drops it, which
+   for a namespaced vocabulary turns a list of choices into nonsense
+   (`:project/info` and `:media/list` both becoming bare `info` and `list`)
+   and makes the edit-distance suggestions compare the wrong strings.
+
+   Everything else is unchanged: an unqualified keyword, a symbol and a
+   string all render exactly as they did."
+  [x]
+  (if (and (or (keyword? x) (symbol? x)) (namespace x))
+    (str (namespace x) "/" (name x))
+    (if (or (keyword? x) (symbol? x)) (name x) (str x))))
+
+(defn backtick [x] (str "`" (label x) "`"))
 
 (defn join-lines
   [& lines]
@@ -52,7 +68,10 @@
                  (when right (str "RIGHT: " right))))))
 
 (defn command-message
-  "Message for invalid command/tool dispatch."
+  "Message for invalid command/tool dispatch.
+
+   Commands are rendered with `label`, so a namespaced vocabulary keeps its
+   namespaces in the list."
   [{:keys [tool command valid-commands examples hint]}]
   (join-lines
    (format "Unknown command%s: %s"
@@ -61,7 +80,7 @@
    ""
    (if (seq valid-commands)
      (join-lines "Available commands:"
-                 (bullet-list (map name valid-commands)))
+                 (bullet-list (map label valid-commands)))
      "Available commands: none were registered by the caller.")
    (when hint (join-lines "" (str "HINT: " hint)))
    (when (seq examples)
@@ -93,13 +112,20 @@
           (recur (inc i) curr))))))
 
 (defn suggest
+  "The `limit` closest choices to `input` by edit distance.
+
+   Distance is measured over `label`, so a namespaced vocabulary compares
+   \"timeline/insert-clip\" rather than \"insert-clip\". Measuring bare names
+   makes every route in one namespace look equally close to every route in
+   another, which is how a suggestion list ends up offering `start`, `abort`
+   and `opacity` for a mistyped `timeline/insert-clips`."
   ([input choices] (suggest input choices 3))
   ([input choices limit]
    (->> choices
         (map (fn [choice]
                {:choice choice
-                :distance (levenshtein-distance (name input) (name choice))}))
-        (sort-by (juxt :distance (comp name :choice)))
+                :distance (levenshtein-distance (label input) (label choice))}))
+        (sort-by (juxt :distance (comp label :choice)))
         (take limit)
         (mapv :choice))))
 
